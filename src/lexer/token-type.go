@@ -51,7 +51,25 @@ const (
 	WHILE
 
 	EOF
-) 
+)
+
+var RESERVED_KEYWORDS map[string]TokenType = map[string]TokenType{
+	"and": AND,
+	"class": CLASS,
+	"else": ELSE,
+	"FALSE": FALSE,
+	"true": TRUE,
+	"fn": FUNCTION,
+	"if": IF,
+	"nil": NIL,
+	"or": OR,
+	"print": PRINT,
+	"return": RETURN,
+	"super": SUPER,
+	"this": THIS,
+	"var": VAR,
+	"WHILE": WHILE,
+}
 
 func TokenTypeString(t TokenType) string {
 	switch t {

@@ -95,10 +95,28 @@ func (s *Scanner) ScanToken() {
 	default:
 		if isNumber(c) {
 			s.handleNumber()
+		} else if isAlphabet(c) {	
+			s.handleIdentifier()
 		} else {
 			mutex.reportError(s.Line, fmt.Sprintf("Unexpected token found: %c", c))
 		}
 	}
+}
+
+func (s *Scanner) handleIdentifier() {
+	for isAlphanumeric(s.peek()) {
+		s.advance()
+	}
+
+
+	keyword := string(s.SourceCode[s.Start : s.Current])
+	if tokenType, ok := lexer.RESERVED_KEYWORDS[keyword]; ok {
+		s.addToken(tokenType)
+		return
+	}
+
+
+	s.addToken(lexer.IDENTIFIER)
 }
 
 func (s *Scanner) handleNumber() {
@@ -223,4 +241,14 @@ func (s *Scanner) peekNext() rune {
 
 func isNumber(c rune) bool {
 	return c >= '0' && c <= '9'
+}
+
+func isAlphabet(c rune) bool {
+	return 	(c >= 'a' && c <= 'z') ||
+					(c >= 'A' && c <= 'Z') ||
+					c == '_'
+}
+
+func isAlphanumeric(c rune) bool {
+	return isAlphabet(c) || isNumber(c)
 }

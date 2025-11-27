@@ -62,9 +62,9 @@ func (m *Mutex) run(sourceCode string) {
 	tokens := scanner.ScanTokens()
 	duration := time.Since(start)
 
-	// for _, token := range tokens {
-	// 	fmt.Println(token)
-	// }
+	for _, token := range tokens {
+		fmt.Println(token)
+	}
 
 	fmt.Printf("Tokenization duration: %s, Total tokens: %d, source code length: %d\n", duration, len(tokens), len(sourceCode))
 }
@@ -73,8 +73,8 @@ func (m *Mutex) reportError(line int, message string) {
 	mutex.report(line, "Report", message)
 }
 func (m *Mutex) report(line int, where, message string) {
-  fmt.Fprintf(os.Stderr, "     |\n")
+	fmt.Fprintf(os.Stderr, "     |\n")
 	fmt.Fprintf(os.Stderr, "%4d | %s::Error -> %s\n", line, where, message)
-  fmt.Fprintf(os.Stderr, "     |\n")
-  m.hadError = true
+	fmt.Fprintf(os.Stderr, "     |\n")
+	m.hadError = true
 }
