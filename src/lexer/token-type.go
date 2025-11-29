@@ -17,6 +17,7 @@ const (
 	SEMICOLON
 	SLASH
 	STAR
+	MODULO
 
 	// One or two char tokens ---
 	NOT
@@ -57,7 +58,7 @@ var RESERVED_KEYWORDS map[string]TokenType = map[string]TokenType{
 	"and": AND,
 	"class": CLASS,
 	"else": ELSE,
-	"FALSE": FALSE,
+	"false": FALSE,
 	"true": TRUE,
 	"fn": FUNCTION,
 	"if": IF,
@@ -68,7 +69,7 @@ var RESERVED_KEYWORDS map[string]TokenType = map[string]TokenType{
 	"super": SUPER,
 	"this": THIS,
 	"var": VAR,
-	"WHILE": WHILE,
+	"while": WHILE,
 }
 
 func TokenTypeString(t TokenType) string {

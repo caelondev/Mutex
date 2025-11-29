@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/caelondev/mutex/src/errors"
+	"github.com/caelondev/mutex/src/parser"
+	"github.com/sanity-io/litter"
 )
 
 type Mutex struct {
@@ -51,6 +55,11 @@ func (m *Mutex) runRepl() {
 		}
 
 		line := input.Text()
+
+		if line == "@exit" {
+			m.Exit(0)
+		}
+
 		mutex.run(line)
 		mutex.hadError = false
 	}
@@ -62,19 +71,33 @@ func (m *Mutex) run(sourceCode string) {
 	tokens := scanner.ScanTokens()
 	duration := time.Since(start)
 
-	for _, token := range tokens {
-		fmt.Println(token)
+	if !m.hadError {
+		for _, token := range tokens {
+			fmt.Println(token)
+		}
 	}
 
-	fmt.Printf("Tokenization duration: %s, Total tokens: %d, source code length: %d\n", duration, len(tokens), len(sourceCode))
+	ast := parser.ProduceAST(tokens)
+	fmt.Printf("\nTokenization duration: %s\nTotal tokens: %d\nsource code length: %d\n", duration, len(tokens), len(sourceCode))
+
+	litter.Dump(ast)
 }
 
-func (m *Mutex) reportError(line int, message string) {
-	mutex.report(line, "Report", message)
+func (m *Mutex) ReportError(line int, message string) {
+	mutex.Report(line, "Report", message)
 }
-func (m *Mutex) report(line int, where, message string) {
-	fmt.Fprintf(os.Stderr, "     |\n")
-	fmt.Fprintf(os.Stderr, "%4d | %s::Error -> %s\n", line, where, message)
-	fmt.Fprintf(os.Stderr, "     |\n")
+
+func (m *Mutex) Report(line int, where, message string) {
 	m.hadError = true
+
+	errors.Report(line, where, message)
+}
+
+func (m *Mutex) Exit(code int) {
+	fmt.Printf("\n[Process exited with code: %d]\n", code)
+	os.Exit(code)
+}
+
+func GetMutex() *Mutex {
+	return &mutex
 }
