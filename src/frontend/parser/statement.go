@@ -20,10 +20,10 @@ func parseStatement(p *parser) ast.Statement {
 
 	expression := parseExpression(p, DEFAULT_BP)
 
-	p.expect(lexer.SEMICOLON)
+	p.ignore(lexer.SEMICOLON)
 
-	return  &ast.ExpressionStatement{
-		Expression:  expression,
+	return &ast.ExpressionStatement{
+		Expression: expression,
 	}
 }
 
@@ -32,26 +32,26 @@ func parseVariableDeclaration(p *parser) ast.Statement {
 	//
 	//  var (mut | imm) variableName = value
 	//
-	
+
 	var identifier string
 	var value ast.Expression
 	var isMutable bool
-	
+
 	p.advance() // eat var keyword ---
 
 	// check (imm/mut)
-	if(p.currentTokenType() != lexer.IMMUTABLE &&
-		 p.currentTokenType() != lexer.MUTABLE) {
+	if p.currentTokenType() != lexer.IMMUTABLE &&
+		p.currentTokenType() != lexer.MUTABLE {
 		errors.ReportParser(fmt.Sprintf("Expected token (MUTABLE/IMMUTABLE) but gor %s instead", lexer.TokenTypeString(p.currentTokenType())), 65)
 	}
 
-	isMutable = p.currentTokenType() == lexer.MUTABLE 
+	isMutable = p.currentTokenType() == lexer.MUTABLE
 	p.advance() // eat imm/mut keyword ---
 
 	identifier = p.expect(lexer.IDENTIFIER).Lexeme
 
 	if p.currentTokenType() != lexer.SEMICOLON {
-		p.expect(lexer.ASSIGNMENT, lexer.SEMICOLON) 
+		p.expect(lexer.ASSIGNMENT, lexer.SEMICOLON)
 		// NOTE: EXPECTING A SEMICOLON HERE IS USELESS... I JUST USED IT FOR ERROR MESSAGE ---
 
 		value = parseExpression(p, DEFAULT_BP)
@@ -61,7 +61,7 @@ func parseVariableDeclaration(p *parser) ast.Statement {
 
 	return &ast.VariableDeclarationStatement{
 		Identifier: identifier,
-		IsMutable: isMutable,
-		Value: value,
+		IsMutable:  isMutable,
+		Value:      value,
 	}
 }

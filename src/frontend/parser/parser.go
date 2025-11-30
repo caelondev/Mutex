@@ -58,6 +58,12 @@ func (p *parser) advance() *lexer.Token {
 	return token
 }
 
+func (p *parser) ignore(tokenType lexer.TokenType) {
+	if p.currentTokenType() == tokenType {
+		p.position++
+	}
+}
+
 func (p *parser) isEOF() bool {
 	return p.position >= len(p.tokens) || p.currentTokenType() == lexer.EOF
 }

@@ -8,6 +8,7 @@ const (
 	BOOLEAN_VALUE ValueTypes = "boolean"
 	NIL_VALUE    ValueTypes = "nil"
 	NUMBER_VALUE ValueTypes = "number"
+	STRING_VALUE ValueTypes = "string"
 )
 
 type RuntimeValue interface {
@@ -22,6 +23,18 @@ func (n *NilValue) Type() ValueTypes {
 
 func (n *NilValue) String() string {
 	return "nil"
+}
+
+type StringValue struct {
+	Value string
+}
+
+func (n *StringValue) Type() ValueTypes {
+	return STRING_VALUE
+}
+
+func (n *StringValue) String() string {
+	return fmt.Sprintf("%v", n.Value)
 }
 
 type NumberValue struct {

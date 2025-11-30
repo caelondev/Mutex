@@ -2,22 +2,24 @@ package runtime
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/caelondev/mutex/src/errors"
 )
 
 type Environment interface {
 	Environment()
-	DeclareVariable(variableName string, value RuntimeValue) RuntimeValue
+	DeclareVariable(variableName string, value RuntimeValue, isConstant bool) RuntimeValue
 	AssignVariable(variableName string, value RuntimeValue) RuntimeValue
 	ResolveVariable(variableName string) Environment
-	GetVariable(variableName string) RuntimeValue  // Capitalized
+	GetVariable(variableName string) RuntimeValue
 	LookupVariable(variableName string) RuntimeValue
 }
 
 type EnvironmentStruct struct {
-	parent    Environment
-	variables map[string]RuntimeValue
+	parent            Environment
+	variables         map[string]RuntimeValue
+	constantVariables []string
 }
 
 func (e *EnvironmentStruct) Environment() {}
@@ -36,46 +38,49 @@ func NewEnvironment(parentEnv Environment) *EnvironmentStruct {
 }
 
 func declareGlobalVariables(env Environment) {
-	env.DeclareVariable("nil", NIL())
-	env.DeclareVariable("true", BOOLEAN(true))
-	env.DeclareVariable("false", BOOLEAN(false))
+	env.DeclareVariable("nil", NIL(), true)
+	env.DeclareVariable("true", BOOLEAN(true), true)
+	env.DeclareVariable("false", BOOLEAN(false), true)
 }
 
-func (e *EnvironmentStruct) DeclareVariable(variableName string, value RuntimeValue) RuntimeValue {
-	// Check if variable already exists in THIS scope (not parent scopes)
+func (e *EnvironmentStruct) DeclareVariable(variableName string, value RuntimeValue, isConstant bool) RuntimeValue {
 	if _, exists := e.variables[variableName]; exists {
 		errors.ReportInterpreter(fmt.Sprintf("Cannot declare variable \"%s\" as it is already defined", variableName), 65)
 	}
 
+	if isConstant {
+		e.constantVariables = append(e.constantVariables, variableName)
+	}
+
 	e.variables[variableName] = value
-	return value
+	return NIL()
 }
 
 func (e *EnvironmentStruct) AssignVariable(variableName string, value RuntimeValue) RuntimeValue {
 	env := e.ResolveVariable(variableName)
-	
-	// Type assert to access variables map
+
 	if envStruct, ok := env.(*EnvironmentStruct); ok {
+		if slices.Contains(envStruct.constantVariables, variableName) {
+			errors.ReportInterpreter(fmt.Sprintf("Cannot re-assign constant variable \"%s\"", variableName), 65)
+		}
+		
 		envStruct.variables[variableName] = value
-		return value
+		return NIL()
 	}
-	
-	errors.ReportInterpreter(fmt.Sprintf("Cannot re-assign variable \"%s\" - invalid environment", variableName), 65)
-	return nil
+
+	errors.ReportInterpreter(fmt.Sprintf("Cannot re-assign variable \"%s\" as it does not exist in the current scope", variableName), 65)
+	return NIL()
 }
 
 func (e *EnvironmentStruct) ResolveVariable(variableName string) Environment {
-	// Check if variable exists in current scope
 	if _, exists := e.variables[variableName]; exists {
 		return e
 	}
 
-	// If no parent, variable doesn't exist anywhere
 	if e.parent == nil {
 		errors.ReportInterpreter(fmt.Sprintf("Cannot resolve variable \"%s\" as it does not exist in the current/outer scopes", variableName), 65)
 	}
 
-	// Recursively check parent scopes
 	return e.parent.ResolveVariable(variableName)
 }
 
