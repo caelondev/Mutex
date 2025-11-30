@@ -38,15 +38,11 @@ const (
 	AND
 	CLASS
 	ELSE
-	FALSE
-	TRUE
 	FUNCTION
 	IF
-	NIL
 	OR
 	MUTABLE
 	IMMUTABLE
-	PRINT
 	RETURN
 	SUPER
 	THIS
@@ -60,13 +56,9 @@ var RESERVED_KEYWORDS map[string]TokenType = map[string]TokenType{
 	"and": AND,
 	"class": CLASS,
 	"else": ELSE,
-	"false": FALSE,
-	"true": TRUE,
 	"fn": FUNCTION,
 	"if": IF,
-	"nil": NIL,
 	"or": OR,
-	"print": PRINT,
 	"return": RETURN,
 	"super": SUPER,
 	"this": THIS,
@@ -134,20 +126,12 @@ func TokenTypeString(t TokenType) string {
 		return "CLASS"
 	case ELSE:
 		return "ELSE"
-	case FALSE:
-		return "FALSE"
-	case TRUE:
-		return "TRUE"
 	case FUNCTION:
 		return "FUNCTION"
 	case IF:
 		return "IF"
-	case NIL:
-		return "NIL"
 	case OR:
 		return "OR"
-	case PRINT:
-		return "PRINT"
 	case RETURN:
 		return "RETURN"
 	case SUPER:

@@ -30,3 +30,10 @@ type BinaryExpression struct {
 }
 
 func (node *BinaryExpression) Expression() {}
+
+type AssignmentExpression struct {
+	Assignee Expression
+	NewValue Expression
+}
+
+func (node *AssignmentExpression) Expression() {}

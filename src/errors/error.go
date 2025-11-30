@@ -28,3 +28,11 @@ func Exit(code int) {
 	fmt.Printf("\n[Process exited with code: %d]\n", code)
 	os.Exit(code)
 }
+
+func ReportInterpreter(message string, code int) {
+	fmt.Fprintf(os.Stderr, "\t|\n")
+	fmt.Fprintf(os.Stderr, "\t| Interpreter::Error -> %s\n", message)
+	fmt.Fprintf(os.Stderr, "\t|\n")
+
+	os.Exit(code)
+}

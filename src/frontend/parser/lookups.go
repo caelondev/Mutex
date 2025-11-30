@@ -58,6 +58,9 @@ func createTokenLookups() {
 	nud(lexer.STRING, parsePrimaryExpression)
 	nud(lexer.LEFT_PARENTHESIS, parsePrimaryExpression)
 
+	// ASSIGNMENT ---
+	led(lexer.ASSIGNMENT, ASSIGNMENT, parseVariableAssignmentExpression)
+
 	// RELATIONAL ---
 	led(lexer.LESS, RELATIONAL, parseBinaryExpression)
 	led(lexer.LESS_EQUAL, RELATIONAL, parseBinaryExpression)

@@ -19,7 +19,7 @@ func parseExpression(p *parser, bp BindingPower) ast.Expression {
 	}
 
 	if !exists {
-		errors.ReportParser(fmt.Sprintf("Unrecognized token found: %s", lexer.TokenTypeString(tokenType)), 0)
+		errors.ReportParser(fmt.Sprintf("Unrecognized token found: %s (NUD)", lexer.TokenTypeString(tokenType)), 0)
 	}
 
 	left := nudFunction(p)
@@ -29,7 +29,7 @@ func parseExpression(p *parser, bp BindingPower) ast.Expression {
 		ledFunction, exists := ledLU[tokenType]
 
 		if !exists {
-			errors.ReportParser(fmt.Sprintf("Unrecognized token found: %s", lexer.TokenTypeString(tokenType)), 0)
+			errors.ReportParser(fmt.Sprintf("Unrecognized token found: %s (LED)", lexer.TokenTypeString(tokenType)), 0)
 		}
 
 		left = ledFunction(p, left, bindingPowerLU[p.currentTokenType()])
@@ -50,7 +50,7 @@ func parsePrimaryExpression(p *parser) ast.Expression {
 			Value: p.advance().Lexeme,
 		}
 	case lexer.IDENTIFIER:
-		return &ast.StringExpression{
+		return &ast.SymbolExpression{
 			Value: p.advance().Lexeme,
 		}
 	case lexer.LEFT_PARENTHESIS:
@@ -60,7 +60,7 @@ func parsePrimaryExpression(p *parser) ast.Expression {
 		return value
 
 	default:
-		panic(fmt.Sprintf("Unrecognized token found: '%s'", lexer.TokenTypeString(p.currentTokenType())))
+		panic(fmt.Sprintf("Unrecognized primary token found: '%s'", lexer.TokenTypeString(p.currentTokenType())))
 	}
 }
 
@@ -72,5 +72,13 @@ func parseBinaryExpression(p *parser, left ast.Expression, bp BindingPower) ast.
 		Left: left,
 		Right: right,
 		Operator: *operatorToken,
+	}
+}
+
+func parseVariableAssignmentExpression(p *parser, left ast.Expression, bp BindingPower) ast.Expression {
+	p.advance() // Eat past = token ---
+	return &ast.AssignmentExpression{
+		Assignee: left,
+		NewValue: parseExpression(p, bp),
 	}
 }
