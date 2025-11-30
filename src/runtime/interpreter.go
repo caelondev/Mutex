@@ -18,10 +18,12 @@ func EvaluateStatement(node ast.Statement, env Environment) RuntimeValue {
 		return EvaluateExpression(n.Expression, env)
 	case *ast.VariableDeclarationStatement:
 		return evaluateVariableDeclarationStatement(n, env)
-	case *ast.IfStatement:  // Add this case
+	case *ast.IfStatement: // Add this case
 		return evaluateIfStatement(n, env)
 	case *ast.WhileStatement:
 		return evaluateWhileStatement(n, env)
+	case *ast.ForStatement:
+		return evaluateForStatement(n, env)
 
 	default:
 		litter.Dump(fmt.Sprintf("Unsupported statement node type: %T", node))
@@ -56,13 +58,13 @@ func EvaluateExpression(node ast.Expression, env Environment) RuntimeValue {
 func evaluateBlockStatement(block *ast.BlockStatement, env Environment) RuntimeValue {
 	// Create a new child environment for block scope
 	blockEnv := NewEnvironment(env)
-	
+
 	var lastEvaluated RuntimeValue = &NilValue{}
-	
+
 	for _, statement := range block.Body {
 		lastEvaluated = EvaluateStatement(statement, blockEnv) // Use blockEnv instead of env
 	}
-	
+
 	return lastEvaluated
 }
 
@@ -111,7 +113,7 @@ func evaluateNumericBinaryExpression(left *NumberValue, right *NumberValue, oper
 			panic("Modulo by zero")
 		}
 		result = math.Mod(lhs, rhs)
-	
+
 	case lexer.LESS:
 		return BOOLEAN(lhs < rhs)
 	case lexer.LESS_EQUAL:
@@ -157,14 +159,14 @@ func evaluateAssignmentExpression(expr *ast.AssignmentExpression, env Environmen
 
 func evaluateIfStatement(stmt *ast.IfStatement, env Environment) RuntimeValue {
 	condition := EvaluateExpression(stmt.Condition, env)
-	
+
 	// Check if condition is truthy
 	if isTruthy(condition) {
 		return EvaluateStatement(stmt.Consequent, env)
 	} else if stmt.Alternate != nil {
 		return EvaluateStatement(stmt.Alternate, env)
 	}
-	
+
 	return NIL()
 }
 
@@ -192,6 +194,25 @@ func evaluateWhileStatement(stmt *ast.WhileStatement, env Environment) RuntimeVa
 		}
 
 		EvaluateStatement(stmt.Body, env)
+	}
+
+	return NIL()
+}
+
+func evaluateForStatement(stmt *ast.ForStatement, env Environment) RuntimeValue {
+	loopEnv := NewEnvironment(env)
+
+	EvaluateStatement(stmt.Initializer, loopEnv)
+
+	for {
+		condition := EvaluateExpression(stmt.Condition, loopEnv)
+
+		if !isTruthy(condition) {
+			break
+		}
+
+		EvaluateStatement(stmt.Body, loopEnv)
+		EvaluateExpression(stmt.Increment, loopEnv) // Increment after body
 	}
 
 	return NIL()

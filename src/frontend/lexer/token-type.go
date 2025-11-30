@@ -41,6 +41,7 @@ const (
 	FUNCTION
 	IF
 	OR
+	FOR
 	MUTABLE
 	IMMUTABLE
 	RETURN
@@ -66,6 +67,7 @@ var RESERVED_KEYWORDS map[string]TokenType = map[string]TokenType{
 	"imm": IMMUTABLE,
 	"var": VAR,
 	"while": WHILE,
+	"for": FOR,
 }
 
 func TokenTypeString(t TokenType) string {
@@ -146,6 +148,8 @@ func TokenTypeString(t TokenType) string {
 		return "VAR"
 	case WHILE:
 		return "WHILE"
+	case FOR:
+		return "FOR"
 
 	case EOF:
 		return "EOF"

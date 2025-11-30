@@ -21,9 +21,9 @@ const (
 	PRIMARY
 )
 
-type StatementHandler func (p *parser) ast.Statement
-type NudHandler func (p *parser) ast.Expression
-type LedHandler func (p *parser, left ast.Expression, bp BindingPower) ast.Expression
+type StatementHandler func(p *parser) ast.Statement
+type NudHandler func(p *parser) ast.Expression
+type LedHandler func(p *parser, left ast.Expression, bp BindingPower) ast.Expression
 
 type StatementLookup map[lexer.TokenType]StatementHandler
 type NudLookup map[lexer.TokenType]NudHandler
@@ -75,7 +75,6 @@ func createTokenLookups() {
 	led(lexer.SLASH, MULTIPLICATIVE, parseBinaryExpression)
 	led(lexer.MODULO, MULTIPLICATIVE, parseBinaryExpression)
 	led(lexer.STAR, MULTIPLICATIVE, parseBinaryExpression)
-	
 
 	// LOGICAL ---
 	led(lexer.AND, LOGICAL, parseBinaryExpression)
@@ -86,5 +85,5 @@ func createTokenLookups() {
 	statement(lexer.VAR, parseVariableDeclaration)
 	statement(lexer.IF, parseIfStatement)
 	statement(lexer.WHILE, parseWhileStatement)
-
+	statement(lexer.FOR, parseForStatement)
 }

@@ -34,3 +34,12 @@ type WhileStatement struct {
 }
 
 func (node *WhileStatement) Statement() {}
+
+type ForStatement struct {
+	Initializer Statement
+	Condition   Expression
+	Increment   Expression
+	Body        Statement
+}
+
+func (node *ForStatement) Statement() {}

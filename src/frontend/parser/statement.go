@@ -37,7 +37,6 @@ func parseVariableDeclaration(p *parser) ast.Statement {
 	p.advance() // eat var keyword ---
 
 	// check (imm/mut)
-
 	mutabilityType := p.expect(lexer.MUTABLE, lexer.IMMUTABLE).TokenType
 
 	isMutable = mutabilityType == lexer.MUTABLE
@@ -124,6 +123,7 @@ func parseWhileStatement (p *parser) ast.Statement {
 	//
 	// while(condition) { ... } ---
 	//
+	
 	p.advance() // eat while token ---
 	p.ignore(lexer.LEFT_PARENTHESIS)
 
@@ -142,4 +142,36 @@ func parseWhileStatement (p *parser) ast.Statement {
 		Body: body,
 	}
 
+}
+
+func parseForStatement(p *parser) ast.Statement {
+	// SYNTAX --- 
+	//
+	// for (initializer; condition; increment) { ... } ---
+	//
+
+	p.advance() // Eat `for` token
+
+	p.expect(lexer.LEFT_PARENTHESIS)
+
+	initializer := parseVariableDeclaration(p) // Already consumes semicolon
+
+	condition := parseExpression(p, DEFAULT_BP)
+	p.expect(lexer.SEMICOLON)
+
+	increment := parseExpression(p, DEFAULT_BP)
+
+	p.expect(lexer.RIGHT_PARENTHESIS)
+
+	// Parse body
+	p.expect(lexer.LEFT_BRACE)
+	body := parseBlock(p)
+	p.expect(lexer.RIGHT_BRACE)
+
+	return &ast.ForStatement{
+		Initializer: initializer,
+		Condition:   condition,
+		Increment:   increment,
+		Body:        body,
+	}
 }
