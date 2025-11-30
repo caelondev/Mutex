@@ -77,8 +77,49 @@ func parseBinaryExpression(p *parser, left ast.Expression, bp BindingPower) ast.
 
 func parseVariableAssignmentExpression(p *parser, left ast.Expression, bp BindingPower) ast.Expression {
 	operatorToken := p.advance() // Get the operator (=, +=, -=, etc.)
-	value := parseExpression(p, bp)
+	value := parseExpression(p, ASSIGNMENT)
 
+	// Check if left side is an index expression (arr[0] = ...)
+	if indexExpr, ok := left.(*ast.ArrayIndexExpression); ok {
+		// Handle compound assignment for arrays
+		if operatorToken.TokenType != lexer.ASSIGNMENT {
+			var binaryOp lexer.TokenType
+			switch operatorToken.TokenType {
+			case lexer.PLUS_EQUALS:
+				binaryOp = lexer.PLUS
+			case lexer.MINUS_EQUALS:
+				binaryOp = lexer.MINUS
+			case lexer.STAR_EQUALS:
+				binaryOp = lexer.STAR
+			case lexer.SLASH_EQUALS:
+				binaryOp = lexer.SLASH
+			case lexer.MODULO_EQUALS:
+				binaryOp = lexer.MODULO
+			default:
+				errors.ReportParser(fmt.Sprintf("Unrecognized compound assignment operator: %s", lexer.TokenTypeString(operatorToken.TokenType)), 65)
+			}
+
+			// arr[i] += 5  becomes  arr[i] = arr[i] + 5
+			value = &ast.BinaryExpression{
+				Left:  indexExpr, // arr[i]
+				Right: value,
+				Operator: lexer.Token{
+					TokenType: binaryOp,
+					Lexeme:    lexer.TokenTypeString(binaryOp),
+					Literal:   nil,
+					Line:      operatorToken.Line,
+				},
+			}
+		}
+
+		return &ast.ArrayIndexAssignmentExpression{
+			Object:   indexExpr.Object,
+			Index:    indexExpr.Index,
+			NewValue: value,
+		}
+	}
+
+	// Handle regular variable assignment
 	if operatorToken.TokenType != lexer.ASSIGNMENT {
 		var binaryOp lexer.TokenType
 		switch operatorToken.TokenType {
@@ -97,7 +138,7 @@ func parseVariableAssignmentExpression(p *parser, left ast.Expression, bp Bindin
 		}
 
 		value = &ast.BinaryExpression{
-			Left:  left, // Use the original left sid
+			Left:  left,
 			Right: value,
 			Operator: lexer.Token{
 				TokenType: binaryOp,
@@ -130,5 +171,48 @@ func parsePostfixExpression(p *parser, left ast.Expression, bp BindingPower) ast
 	return &ast.PostfixExpression{
 		Operator: *operatorToken,
 		Operand:  left,
+	}
+}
+
+func parseArrayExpression(p *parser) ast.Expression {
+	// Parse: [1, 2, 3]
+	p.advance() // eat '['
+	
+	var elements []ast.Expression
+	
+	// Handle empty array: []
+	if p.currentTokenType() == lexer.RIGHT_BRACKET {
+		p.advance() // eat ']'
+		return &ast.ArrayExpression{
+			Elements: elements,
+		}
+	}
+	
+	// Parse first element
+	elements = append(elements, parseExpression(p, DEFAULT_BP))
+	
+	// Parse remaining elements
+	for p.currentTokenType() == lexer.COMMA {
+		p.advance() // eat ','
+		elements = append(elements, parseExpression(p, DEFAULT_BP))
+	}
+	
+	p.expect(lexer.RIGHT_BRACKET) // eat ']'
+	
+	return &ast.ArrayExpression{
+		Elements: elements,
+	}
+}
+func parseIndexExpression(p *parser, left ast.Expression, bp BindingPower) ast.Expression {
+	// Parse: arr[0] or arr[i+1]
+	p.advance() // eat '['
+	
+	index := parseExpression(p, DEFAULT_BP)
+	
+	p.expect(lexer.RIGHT_BRACKET) // eat ']'
+	
+	return &ast.ArrayIndexExpression{
+		Object: left,
+		Index:  index,
 	}
 }

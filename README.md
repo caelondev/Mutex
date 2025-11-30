@@ -22,7 +22,7 @@ mutex <filepath>   # Execute a Mutex source file
 
 ### Types
 
-Mutex supports the following primitive types:
+Mutex supports the following data types:
 
 ```mutex
 // Number - IEEE 754 double-precision floating-point
@@ -41,6 +41,9 @@ false
 
 // Nil - represents absence of value
 nil
+
+// Arrays - represents a list of data compressed into one
+["Mutex", 0, 1, "Hello, World", true, 3.14159]
 ```
 
 ### Variable Declarations
@@ -60,6 +63,46 @@ counter += 1
 ```mutex
 var imm max_retries = 3;
 // max_retries = 5;  // Error: cannot reassign immutable variable
+```
+
+### Arrays
+
+**Mutex arrays** can be instantiated with the syntax
+```mutex
+[0, 1, 2, ...]
+```
+
+Arrays are objects, they're a reference in the memory. hence they cannot be directly compared...
+```mutex
+[] == [] // INVALID!
+```
+
+#### Indexing
+
+If you want to compare the data inside an array, you need to index the values
+```mutex
+var mut fruits = ["apple", "orange", "banana"]
+
+fruits[0] // apple
+fruits[1] // orange
+fruits[2] // banana
+```
+
+You can also do nested arrays
+```mutex
+var mut random = [[0, "Hello"], ["Apple", 50], "World"]
+
+random[0][1] // "Hello"
+random[2] // "World"
+```
+
+#### Re-assigning
+
+Re-assigning array values is as easy as reassigning a variable value
+```mutex
+var mut placeholders = ["foo", "bar"]
+
+placeholders[0] = "baz" // This replaces "foo" with "baz"
 ```
 
 ### Expressions
@@ -82,7 +125,7 @@ x /= 5    // Shorthand for `x = x / 5`
 x %= 3    // Shorthand for `x = x % 5`
 ```
 
-### Incremnt/Decrement Operators
+#### Increment/Decrement Operators
 ```mutex
 x++ // Shorthand for `x = x + 1`
 x-- // Shorthand for `x = x - 1`
@@ -100,9 +143,11 @@ x-- // Shorthand for `x = x - 1`
 
 #### Logical Operators
 ```mutex
-true && false   // Logical AND
-true || false   // Logical OR
-!true          // Logical NOT
+true and true // true
+false or true // true
+not true // false
+
+not (true and true) //false
 ```
 
 ### Control Flow
@@ -128,13 +173,15 @@ if temperature > 30 {
 }
 ```
 
+
+
 #### While Loops
 
 Execute code repeatedly while a condition holds true:
 
 ```mutex
 var mut i = 0;
-while (i < 5) {
+while (i < 5 and i >= 0) {
     i = i + 1;
 }
 // i is now 5
@@ -165,7 +212,7 @@ var mut x = 10;
 
 if (x > 5) {
     var mut y = 20;  // y is scoped to this block
-    x = x + y;       // x is accessible from outer scope
+    x += y;          // x is accessible from outer scope
 }
 
 // x is 30
@@ -178,7 +225,7 @@ if (x > 5) {
 ```mutex
 var mut sum = 0;
 for (var mut i = 1; i <= 100; i++) {
-    sum = sum + i;
+    sum += i;
 }
 
 // sum is now 5050

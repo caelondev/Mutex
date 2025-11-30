@@ -178,3 +178,75 @@ func evaluatePostfixExpression(expr *ast.PostfixExpression, env Environment) Run
 	env.AssignVariable(symbol.Value, newValue)
 	return numValue
 }
+
+func evaluateArrayExpression(expr *ast.ArrayExpression, env Environment) RuntimeValue {
+	elements := make([]RuntimeValue, len(expr.Elements))
+	
+	for i, elemExpr := range expr.Elements {
+		elements[i] = EvaluateExpression(elemExpr, env)
+	}
+	
+	return ARRAY(elements)
+}
+
+func evaluateIndexExpression(expr *ast.ArrayIndexExpression, env Environment) RuntimeValue {
+	object := EvaluateExpression(expr.Object, env)
+	index := EvaluateExpression(expr.Index, env)
+	
+	// Check if object is an array
+	arrayValue, ok := object.(*ArrayValue)
+	if !ok {
+		errors.ReportInterpreter(fmt.Sprintf("Cannot index into type '%s', expected array", object.Type()), 65)
+		return NIL()
+	}
+	
+	// Check if index is a number
+	indexNum, ok := index.(*NumberValue)
+	if !ok {
+		errors.ReportInterpreter(fmt.Sprintf("Array index must be a number, got '%s'", index.Type()), 65)
+		return NIL()
+	}
+	
+	// Convert to integer and check bounds
+	idx := int(indexNum.Value)
+	
+	if idx < 0 || idx >= len(arrayValue.Elements) {
+		errors.ReportInterpreter(fmt.Sprintf("Array index %d out of bounds (array length: %d)", idx, len(arrayValue.Elements)), 65)
+		return NIL()
+	}
+	
+	return arrayValue.Elements[idx]
+}
+
+func evaluateIndexAssignmentExpression(expr *ast.ArrayIndexAssignmentExpression, env Environment) RuntimeValue {
+	object := EvaluateExpression(expr.Object, env)
+	index := EvaluateExpression(expr.Index, env)
+	newValue := EvaluateExpression(expr.NewValue, env)
+	
+	// Check if object is an array
+	arrayValue, ok := object.(*ArrayValue)
+	if !ok {
+		errors.ReportInterpreter(fmt.Sprintf("Cannot index into type '%s', expected array", object.Type()), 65)
+		return NIL()
+	}
+	
+	// Check if index is a number
+	indexNum, ok := index.(*NumberValue)
+	if !ok {
+		errors.ReportInterpreter(fmt.Sprintf("Array index must be a number, got '%s'", index.Type()), 65)
+		return NIL()
+	}
+	
+	// Convert to integer and check bounds
+	idx := int(indexNum.Value)
+	
+	if idx < 0 || idx >= len(arrayValue.Elements) {
+		errors.ReportInterpreter(fmt.Sprintf("Array index %d out of bounds (array length: %d)", idx, len(arrayValue.Elements)), 65)
+		return NIL()
+	}
+	
+	// Mutate the array in place
+	arrayValue.Elements[idx] = newValue
+	
+	return NIL()
+}

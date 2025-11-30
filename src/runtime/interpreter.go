@@ -18,6 +18,13 @@ func EvaluateExpression(node ast.Expression, env Environment) RuntimeValue {
 		return evaluateUnaryExpression(n, env)
 	case *ast.PostfixExpression:
 		return evaluatePostfixExpression(n, env)
+	case *ast.ArrayExpression:
+		return evaluateArrayExpression(n, env)
+	case *ast.ArrayIndexExpression:
+		return evaluateIndexExpression(n, env)
+	case *ast.ArrayIndexAssignmentExpression:
+		return evaluateIndexAssignmentExpression(n, env)
+
 	default:
 		panic("Unsupported expression node type")
 	}

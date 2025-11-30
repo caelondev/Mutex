@@ -51,3 +51,24 @@ type PostfixExpression struct {
 }
 
 func (node *PostfixExpression) Expression() {}
+
+type ArrayExpression struct {
+	Elements []Expression
+}
+
+func (node *ArrayExpression) Expression() {}
+
+type ArrayIndexExpression struct {
+	Object Expression
+	Index Expression
+}
+
+func (node *ArrayIndexExpression) Expression() {}
+
+type ArrayIndexAssignmentExpression struct {
+	Object Expression
+	Index Expression
+	NewValue Expression
+}
+
+func (node *ArrayIndexAssignmentExpression) Expression() {}

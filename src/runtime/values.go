@@ -1,6 +1,9 @@
 package runtime
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type ValueTypes string
 
@@ -9,6 +12,7 @@ const (
 	NIL_VALUE    ValueTypes = "nil"
 	NUMBER_VALUE ValueTypes = "number"
 	STRING_VALUE ValueTypes = "string"
+	ARRAY_VALUE ValueTypes = "array"
 )
 
 type RuntimeValue interface {
@@ -70,4 +74,26 @@ func BOOLEAN(value bool) *BooleanValue {
 	return &BooleanValue{ Value: value }
 }
 
+type ArrayValue struct {
+	Elements []RuntimeValue
+}
 
+func (a *ArrayValue) Type() ValueTypes {
+	return ARRAY_VALUE
+}
+
+func (a *ArrayValue) String() string {
+	if len(a.Elements) == 0 {
+		return "[]"
+	}
+
+	var elements []string
+	for _, elem := range a.Elements {
+		elements = append(elements, fmt.Sprintf("%v", elem))
+	}
+	return "[" + strings.Join(elements, ", ") + "]"
+}
+
+func ARRAY(elements []RuntimeValue) *ArrayValue {
+	return &ArrayValue{Elements: elements}
+}
