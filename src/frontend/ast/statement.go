@@ -11,3 +11,11 @@ type ExpressionStatement struct {
 }
 
 func (node *ExpressionStatement) Statement() {}
+
+type VariableDeclarationStatement struct {
+	IsMutable bool
+	Identifier string
+	Value Expression
+}
+
+func (node *VariableDeclarationStatement) Statement() {}

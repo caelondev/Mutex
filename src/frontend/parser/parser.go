@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/caelondev/mutex/src/errors"
 	"github.com/caelondev/mutex/src/frontend/ast"
@@ -61,19 +62,30 @@ func (p *parser) isEOF() bool {
 	return p.position >= len(p.tokens) || p.currentTokenType() == lexer.EOF
 }
 
-func (p *parser) expect(expectedType lexer.TokenType) *lexer.Token {
-	return p.expectError(expectedType, "")
+func (p *parser) expect(expectedTypes ...lexer.TokenType) *lexer.Token {
+	return p.expectError("", expectedTypes...)
 }
 
-func (p *parser) expectError(expectedType lexer.TokenType, err string) *lexer.Token {
+func (p *parser) expectError(err string, expectedTypes ...lexer.TokenType) *lexer.Token {
 	token := p.currentToken()
 	tokenType := token.TokenType
 
-	if tokenType != expectedType {
-		if err == "" {
-			err = fmt.Sprintf("Expected %s but got %s instead", lexer.TokenTypeString(expectedType), lexer.TokenTypeString(tokenType))
+	matched := false
+	for _, t := range expectedTypes {
+		if tokenType == t {
+			matched = true
+			break
 		}
+	}
 
+	if !matched {
+		if err == "" {
+			var names []string
+			for _, t := range expectedTypes {
+				names = append(names, lexer.TokenTypeString(t))
+			}
+			err = fmt.Sprintf("Expected %s but got %s instead", strings.Join(names, "/"), lexer.TokenTypeString(tokenType))
+		}
 		errors.ReportParser(err, 65)
 	}
 

@@ -7,7 +7,8 @@ import (
 
 	"github.com/caelondev/mutex/src/errors"
 	"github.com/caelondev/mutex/src/frontend/parser"
-	"github.com/caelondev/mutex/src/runtime/interpreter"
+	// "github.com/caelondev/mutex/src/runtime/interpreter"
+	"github.com/sanity-io/litter"
 )
 
 type Mutex struct {
@@ -78,10 +79,13 @@ func (m *Mutex) run(sourceCode string) {
 
 	ast := parser.ProduceAST(tokens)
 
-	result := interpreter.EvaluateStatement(&ast)
+	// result := interpreter.EvaluateStatement(&ast)
 	// fmt.Printf("\nTokenization duration: %s\nTotal tokens: %d\nsource code length: %d\n", duration, len(tokens), len(sourceCode))
 
-	fmt.Printf("\n%v\n\n", result)
+	// fmt.Printf("\n%v\n\n", result)
+	
+
+	litter.Dump(ast)
 }
 
 func (m *Mutex) ReportError(line int, message string) {

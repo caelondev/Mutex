@@ -44,6 +44,8 @@ const (
 	IF
 	NIL
 	OR
+	MUTABLE
+	IMMUTABLE
 	PRINT
 	RETURN
 	SUPER
@@ -68,6 +70,8 @@ var RESERVED_KEYWORDS map[string]TokenType = map[string]TokenType{
 	"return": RETURN,
 	"super": SUPER,
 	"this": THIS,
+	"mut": MUTABLE,
+	"imm": IMMUTABLE,
 	"var": VAR,
 	"while": WHILE,
 }
@@ -150,6 +154,10 @@ func TokenTypeString(t TokenType) string {
 		return "SUPER"
 	case THIS:
 		return "THIS"
+	case MUTABLE:
+		return "MUTABLE"
+	case IMMUTABLE:
+		return "IMMUTABLE"
 	case VAR:
 		return "VAR"
 	case WHILE:
